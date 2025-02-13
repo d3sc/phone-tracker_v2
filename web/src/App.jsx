@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:3000/");
+const url = "https://server-js.d3sc.my.id"
+
+const socket = io(`${url}/`);
 
 const App = () => {
   const [data, setData] = useState([]);
@@ -9,6 +11,9 @@ const App = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
+  const [unlock, setUnlock] = useState(false);
+  const usernameRef = useRef();
+  const passwordRef = useRef();
 
   useEffect(() => {
     const handleConnectedUser = (dataMessage) => {
@@ -20,12 +25,13 @@ const App = () => {
         return;
       }
 
-      setData((prevData) => {
-        const isExist = prevData.some(
-          (item) => Object.keys(item)[0] === Object.keys(dataMessage)[0]
-        );
-        return isExist ? prevData : [...prevData, dataMessage];
-      });
+      // Ubah objek menjadi array key-value
+      const newDevices = Object.entries(dataMessage).map(([id, value]) => ({
+        id,
+        value,
+      }));
+
+      setData(newDevices); // Ganti state dengan data baru
     };
 
     const handleNewLocation = (locationData) => {
@@ -61,7 +67,7 @@ const App = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/getLocation", {
+      const res = await fetch(`${url}/getLocation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: text }),
@@ -76,14 +82,16 @@ const App = () => {
     }
   };
 
-  return (
-    <div>
+  
+  const MainDisplay = () => {
+    return (
+      <div>
       <h2>Available Devices:</h2>
       {data.length > 0 ? (
         <ul>
           {data.map((device, index) => (
             <li key={index}>
-              {index + 1}. {Object.keys(device)[0]}
+              {index + 1}. {device.id}
             </li>
           ))}
         </ul>
@@ -118,7 +126,39 @@ const App = () => {
         <p>📍 No location data available</p>
       )}
     </div>
-  );
+    )
+  }
+
+  const loginProcess = () => {
+    const username = usernameRef.current.value;
+    const password = passwordRef.current.value;
+    if(!username && !password) return alert("harus di isi!!");
+
+    if(username == "admin" && password == "Upilkuda686") {
+      setUnlock(true);
+      return;
+    } else {
+      return alert("salah men!!");
+    }
+  }
+
+
+  const LoginDisplay = () => {
+    return (
+      <div className="">
+        <label htmlFor="username">Username</label>
+      <input type="text" ref={usernameRef} />
+
+      <label htmlFor="password">Password</label>
+      <input type="password" ref={passwordRef} />
+        <button onClick={loginProcess}>Submit</button>
+      </div>
+    )
+  }
+
+  return unlock ? <MainDisplay /> : <LoginDisplay />
+    
+  ;
 };
 
 export default App;

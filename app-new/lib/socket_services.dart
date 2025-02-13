@@ -16,7 +16,7 @@ class SocketServices {
 
   SocketServices._internal() {
     socket = IO.io(
-      "http://192.168.21.29:3000",
+      "https://server-js.d3sc.my.id",
       IO.OptionBuilder().setTransports(["websocket"]).setExtraHeaders(
               {"reconnect": "true"}) // ✅ Tambahkan extra header
           .build(),

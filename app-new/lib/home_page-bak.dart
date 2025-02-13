@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
     Future<void> _sendLocationToServer(
         double latitude, double longitude) async {
-      final url = Uri.parse('http://192.168.21.29:3000/location');
+      final url = Uri.parse('https://server-js.d3sc.my.id/location');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},

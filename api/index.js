@@ -1,7 +1,7 @@
-import http from "http";
-import express from "express";
-import cors from "cors";
-import { Server } from "socket.io";
+const http = require("http");
+const express = require("express");
+const cors = require("cors");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
@@ -15,24 +15,28 @@ const io = new Server(server, {
   reconnectionAttempts: 5,
   reconnectionDelay: 3000,
 });
+
 // cors for web method post
 app.use(cors({ origin: "*" }));
 
 const userSockets = new Map();
 
+let test = "";
+
 io.on("connection", (socket) => {
-  console.log(userSockets);
-  console.log(`Connected : ${socket.id}`);
+  // console.log(userSockets);
+  // console.log(`Connected : ${socket.id}`);
+  
+  test += socket.id + " dan ";
 
   // menampilkan user yang terkoneksi secara realtime ke website react
-  // if (userSockets) {
   io.emit("connectedUser", Object.fromEntries(userSockets));
-  // }
 
   socket.on("user-join", (data) => {
     userSockets.set(data, socket.id);
     console.log(userSockets);
 
+    io.emit("connectedUser", Object.fromEntries(userSockets));
     io.to(socket.id).emit("session-join", "Your are connected");
   });
 
@@ -51,7 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ status: "Server is Running.." });
+  res.json({ status: "Server is Running.. aman men..", device: userSockets, test });
 });
 
 app.post("/getLocation", (req, res) => {
